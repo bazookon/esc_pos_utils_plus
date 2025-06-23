@@ -9,5 +9,5 @@
   "editor.insertSpaces": true,
   "editor.detectIndentation": false,
   "editor.tabSize": 2,
-  "dart.flutterSdkPath": "/Users/whitehat/fvm/versions/3.10.0"
+  "dart.flutterSdkPath": ".fvm/versions/3.32.4"
 }

@@ -41,8 +41,8 @@ class _HomePageState extends State<HomePage> {
               value: mode,
               items: PrintMode.values
                   .map((e) => DropdownMenuItem(
-                        child: Text(e.name),
                         value: e,
+                        child: Text(e.name),
                       ))
                   .toList(),
               onChanged: (v) => setState(() {
@@ -88,7 +88,7 @@ class _HomePageState extends State<HomePage> {
     );
   }
 
-  generate() async {
+  Future<List<int>> generate() async {
     final profile = await CapabilityProfile.load();
     final generator = Generator(PaperSize.mm80, profile);
     List<int> bytes = [];
@@ -160,9 +160,11 @@ class _HomePageState extends State<HomePage> {
 
     bytes += generator.feed(2);
     bytes += generator.cut();
+
+    return bytes;
   }
 
-  printText() async {
+  Future<void> printText() async {
     final profile = await CapabilityProfile.load();
     final generator = Generator(PaperSize.mm80, profile);
     List<int> bytes = [];
@@ -202,7 +204,7 @@ class _HomePageState extends State<HomePage> {
     }
   }
 
-  printColumns() async {
+  Future<void> printColumns() async {
     final profile = await CapabilityProfile.load();
     final generator = Generator(PaperSize.mm80, profile);
     List<int> bytes = [];
@@ -260,7 +262,7 @@ class _HomePageState extends State<HomePage> {
     }
   }
 
-  printImage() async {
+  Future<void> printImage() async {
     final profile = await CapabilityProfile.load();
     final generator = Generator(PaperSize.mm80, profile);
     List<int> bytes = [];
