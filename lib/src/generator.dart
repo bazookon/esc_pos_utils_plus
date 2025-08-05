@@ -685,6 +685,7 @@ class Generator {
     BarcodeFont? font,
     BarcodeText textPos = BarcodeText.below,
     PosAlign align = PosAlign.center,
+    int linesAfter = 2, // 🆕 NUEVO PARÁMETRO
   }) {
     List<int> bytes = [];
     // Set alignment
@@ -716,6 +717,12 @@ class Generator {
       // Function B
       bytes += header + [barcode.data!.length] + barcode.data!;
     }
+
+    // 🔧 FIX: Añadir saltos de línea después del barcode para forzar la impresión
+    if (linesAfter > 0) {
+      bytes += emptyLines(linesAfter);
+    }
+
     return bytes;
   }
 
