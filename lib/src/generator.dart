@@ -559,7 +559,10 @@ class Generator {
     bytes += emptyLines(1);
 
     if (isNextRow) {
-      row(nextRow);
+      // Bug fix: la recursión retornaba `List<int>` pero el caller descartaba
+      // el resultado, así que las filas de continuación (cuando un column
+      // overflowa y se parte) nunca se imprimían. Las acumulamos en `bytes`.
+      bytes += row(nextRow);
     }
     return bytes;
   }
