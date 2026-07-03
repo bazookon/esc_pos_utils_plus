@@ -486,15 +486,36 @@ class Generator {
         // If the col's content is too long, split it to the next row
         int realCharactersNb = encodedToPrint.length;
         if (realCharactersNb > maxCharactersNb) {
-          // Print max possible and split to the next row
-          Uint8List encodedToPrintNextRow =
-              encodedToPrint.sublist(maxCharactersNb);
-          encodedToPrint = encodedToPrint.sublist(0, maxCharactersNb);
-          isNextRow = true;
-          nextRow.add(PosColumn(
-              textEncoded: encodedToPrintNextRow,
-              width: cols[i].width,
-              styles: cols[i].styles));
+          const int space = 0x20;
+          // Word wrap: break at the last space that fits on this line.
+          // Falls back to a hard split when a single word is longer
+          // than the column width.
+          int splitPos = maxCharactersNb;
+          int nextStart = maxCharactersNb;
+          for (int p = maxCharactersNb; p > 0; --p) {
+            if (encodedToPrint[p] == space) {
+              splitPos = p;
+              nextStart = p + 1;
+              break;
+            }
+          }
+          // Skip extra spaces at the start of the continuation line
+          while (nextStart < realCharactersNb &&
+              encodedToPrint[nextStart] == space) {
+            nextStart++;
+          }
+          Uint8List encodedToPrintNextRow = encodedToPrint.sublist(nextStart);
+          encodedToPrint = encodedToPrint.sublist(0, splitPos);
+          if (encodedToPrintNextRow.isNotEmpty) {
+            isNextRow = true;
+            nextRow.add(PosColumn(
+                textEncoded: encodedToPrintNextRow,
+                width: cols[i].width,
+                styles: cols[i].styles));
+          } else {
+            nextRow.add(PosColumn(
+                text: '', width: cols[i].width, styles: cols[i].styles));
+          }
         } else {
           // Insert an empty col
           nextRow.add(PosColumn(
