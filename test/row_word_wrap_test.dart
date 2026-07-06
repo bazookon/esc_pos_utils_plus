@@ -112,6 +112,37 @@ void main() {
     expect(printedWords.join(' '), source);
   });
 
+  test('embedded newlines in column text do not break column positioning', () {
+    // Ticket de producto real: nombre con '\n' embebido (mm58, columnas 2+10)
+    final bytes = generator.row([
+      PosColumn(
+          text: '1x',
+          width: 2,
+          styles: const PosStyles(align: PosAlign.left, bold: true)),
+      PosColumn(
+          text: 'mistral 35° 750cc\n(botella)(+6 redbull)',
+          width: 10,
+          styles: const PosStyles(align: PosAlign.left, bold: true)),
+    ]);
+
+    final lines = render(bytes);
+    for (final l in lines) {
+      // ignore: avoid_print
+      print('|${l.padRight(32)}|');
+    }
+
+    // No blank lines in the middle, and every continuation line must be
+    // indented to the product column (col index 2 of 12 -> char 5), never
+    // at column 0.
+    final content = lines.where((l) => l.isNotEmpty).toList();
+    expect(content.length, lines.length,
+        reason: 'embedded newline produced a blank line');
+    for (final l in content.skip(1)) {
+      expect(l.startsWith('     '), true,
+          reason: 'continuation "$l" is not aligned to its column');
+    }
+  });
+
   test('header row with short column does not leak dot to next line', () {
     final bytes = generator.row([
       PosColumn(

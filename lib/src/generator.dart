@@ -483,6 +483,13 @@ class Generator {
             ? cols[i].textEncoded!
             : _encode(cols[i].text);
 
+        // A newline inside a column breaks the absolute positioning (the
+        // cursor jumps to column 0 of the next line), so replace LF/CR
+        // with spaces and let the word-wrap below handle the overflow.
+        encodedToPrint = Uint8List.fromList(encodedToPrint
+            .map((b) => (b == 0x0A || b == 0x0D) ? 0x20 : b)
+            .toList());
+
         // If the col's content is too long, split it to the next row
         int realCharactersNb = encodedToPrint.length;
         if (realCharactersNb > maxCharactersNb) {
@@ -531,18 +538,20 @@ class Generator {
       } else {
         // CASE 1: containsChinese = true
         // Split text into multiple lines if it too long
+        final String colText =
+            cols[i].text.replaceAll('\n', ' ').replaceAll('\r', ' ');
         int counter = 0;
         int splitPos = 0;
-        for (int p = 0; p < cols[i].text.length; ++p) {
-          final int w = _isChinese(cols[i].text[p]) ? 2 : 1;
+        for (int p = 0; p < colText.length; ++p) {
+          final int w = _isChinese(colText[p]) ? 2 : 1;
           if (counter + w >= maxCharactersNb) {
             break;
           }
           counter += w;
           splitPos += 1;
         }
-        String toPrintNextRow = cols[i].text.substring(splitPos);
-        String toPrint = cols[i].text.substring(0, splitPos);
+        String toPrintNextRow = colText.substring(splitPos);
+        String toPrint = colText.substring(0, splitPos);
 
         if (toPrintNextRow.isNotEmpty) {
           isNextRow = true;
